@@ -9,17 +9,24 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func FreezeFunds(c *gin.Context) {
-	userIDStr := c.PostForm("user_id")
-	currency := c.PostForm("currency")
-	amountStr := c.PostForm("amount")
-	txID := c.PostForm("tx_id")
-	bizID := c.PostForm("biz_id")
+type FreezeFundsRequest struct {
+	Currency string `json:"currency" binding:"required"`
+	Amount   string `json:"amount" binding:"required"`
+	TxId     string `json:"tx_id" binding:"required"`
+	BizId    string `json:"biz_id" binding:"required"`
+}
 
+func FreezeFunds(c *gin.Context) {
+	userIDStr := c.Param("userID")
+	var req FreezeFundsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 	userID, _ := strconv.ParseInt(userIDStr, 10, 64)
-	amount, _ := strconv.ParseInt(amountStr, 10, 64)
+	amount, _ := strconv.ParseInt(req.Amount, 10, 64)
 	accountService := service.AccountService{}
-	err := accountService.FreezeFunds(userID, currency, amount, txID, bizID)
+	err := accountService.FreezeFunds(userID, req.Currency, amount, req.TxId, req.BizId)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return

@@ -23,7 +23,7 @@ func SetupRouter() *gin.Engine {
 
 	trade := r.Group("/trade")
 	{
-		trade.POST("/freeze", handler.FreezeFunds)
+		trade.POST("/freeze/:userId", handler.FreezeFunds)
 	}
 
 	return r
